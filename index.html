@@ -409,6 +409,45 @@
     .score-medium { color: var(--yellow); }
     .score-high { color: var(--red); }
 
+    .comps-section {
+      margin-top: 18px;
+    }
+
+    .comps-table-wrap {
+      margin-top: 12px;
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(7, 14, 28, 0.62);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    th {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      font-size: 0.95rem;
+    }
+
+    td {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
     .how-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -692,7 +731,7 @@
         <div class="section-head">
           <h2>Interactive demo</h2>
           <p>
-            This interactive demo illustrates how CRElytics delivers pricing, risk, and underwriting insights in real time. Enter a few property details and generate pricing and risk outputs instantly.
+            This interactive demo illustrates how CRElytics delivers pricing, risk, underwriting, and market benchmark insights in real time.
           </p>
         </div>
 
@@ -786,6 +825,24 @@
                 CRElytics recommends a moderate increase in asking rent while maintaining leasing flexibility. Current occupancy supports pricing power, but tenant retention should remain a focus over the next 12 months.
               </div>
             </div>
+
+            <div class="comps-section">
+              <div class="result-label" style="margin-top: 18px;">Market Comparables</div>
+              <div class="comps-table-wrap">
+                <table id="compsTable">
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Rent ($/SF)</th>
+                      <th>Occupancy</th>
+                      <th>Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -838,7 +895,7 @@
           <div class="pricing-card">
             <h3>Starter</h3>
             <div class="price">$199<span style="font-size: 1rem; color: var(--muted);"> / month</span></div>
-            <p>For independent brokers, small owners, and student demo environments.</p>
+            <p>For independent brokers, small owners, and growing operators.</p>
             <ul>
               <li>Property-level analysis</li>
               <li>Rent recommendations</li>
@@ -882,7 +939,7 @@
           <div>
             <h2>Commercial real estate needs a decision engine, not just more data.</h2>
             <p>
-              CRElytics turns leasing and underwriting from manual guesswork into a smarter, faster, and more scalable workflow. CRElytics is built to scale across portfolios, enabling faster, data-driven leasing and investment decisions.
+              CRElytics is built to scale across portfolios, enabling faster, data-driven leasing and investment decisions.
             </p>
           </div>
           <a href="mailto:hello@crelytics.ai" class="btn btn-primary">Request a Demo</a>
@@ -893,14 +950,70 @@
 
   <footer>
     <div class="container footer-row">
-      <div>© 2026 CRElytics. Built for smarter commercial real estate decisions.</div>
       <div>© 2026 CRElytics. All rights reserved.</div>
+      <div>Built for smarter commercial real estate decisions.</div>
     </div>
   </footer>
 
   <script>
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
+    }
+
+    const comparablesData = {
+      nashville: [
+        { name: "Nashville Tower A", rent: 32.50, occ: 91, type: "Office" },
+        { name: "Riverfront Plaza", rent: 30.75, occ: 87, type: "Office" },
+        { name: "Midtown Center", rent: 29.90, occ: 83, type: "Office" }
+      ],
+      atlanta: [
+        { name: "Peachtree Offices", rent: 34.20, occ: 89, type: "Office" },
+        { name: "Buckhead Tower", rent: 36.10, occ: 92, type: "Office" },
+        { name: "Atlanta Hub", rent: 31.40, occ: 85, type: "Office" }
+      ],
+      charlotte: [
+        { name: "South End Plaza", rent: 33.00, occ: 90, type: "Office" },
+        { name: "Uptown Center", rent: 35.20, occ: 88, type: "Office" },
+        { name: "Trade Street Tower", rent: 31.70, occ: 84, type: "Office" }
+      ],
+      austin: [
+        { name: "Tech Ridge Offices", rent: 38.50, occ: 86, type: "Office" },
+        { name: "Downtown Austin Tower", rent: 41.20, occ: 90, type: "Office" },
+        { name: "Lakeside Offices", rent: 36.90, occ: 82, type: "Office" }
+      ],
+      dallas: [
+        { name: "Dallas Financial Center", rent: 35.80, occ: 88, type: "Office" },
+        { name: "Uptown Dallas Tower", rent: 37.40, occ: 91, type: "Office" },
+        { name: "Legacy West Offices", rent: 34.60, occ: 86, type: "Office" }
+      ]
+    };
+
+    function updateComparables(market, assetType) {
+      const tableBody = document.querySelector("#compsTable tbody");
+      tableBody.innerHTML = "";
+
+      let comps = comparablesData[market] || [];
+
+      comps = comps.map(comp => ({
+        ...comp,
+        type:
+          assetType === "office" ? "Office" :
+          assetType === "retail" ? "Retail" :
+          assetType === "industrial" ? "Industrial" :
+          "Multifamily"
+      }));
+
+      comps.forEach(comp => {
+        const row = `
+          <tr>
+            <td>${comp.name}</td>
+            <td>$${comp.rent.toFixed(2)}</td>
+            <td>${comp.occ}%</td>
+            <td>${comp.type}</td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
     }
 
     function runAnalysis() {
@@ -990,9 +1103,17 @@
       riskScoreEl.className = `result-value ${riskClass}`;
       document.getElementById('riskNote').textContent = riskNote;
 
-      const summary = `CRElytics recommends ${rentChange >= 0 ? 'raising' : 'trimming'} asking rent to $${roundedRent} per square foot for this ${assetType} asset in ${market.charAt(0).toUpperCase() + market.slice(1)}. The tenant renewal outlook is ${renewal}% and overall risk is ${riskLabel.toLowerCase()}. Based on these assumptions, this asset appears ${riskLabel === 'HIGH' ? 'more defensive action may be needed before pushing rents aggressively.' : riskLabel === 'MEDIUM' ? 'positioned for selective pricing improvement with active leasing management.' : 'well-positioned for a measured pricing strategy with stable fundamentals.'}`;
+      const marketName = market.charAt(0).toUpperCase() + market.slice(1);
+      const assetName = assetType.charAt(0).toUpperCase() + assetType.slice(1);
+
+      const summary = `CRElytics recommends ${rentChange >= 0 ? 'raising' : 'trimming'} asking rent to $${roundedRent} per square foot for this ${assetName} asset in ${marketName}. The tenant renewal outlook is ${renewal}% and overall risk is ${riskLabel.toLowerCase()}. Based on these assumptions, this asset appears ${riskLabel === 'HIGH' ? 'to require more defensive action before pricing is pushed aggressively.' : riskLabel === 'MEDIUM' ? 'positioned for selective pricing improvement with active leasing management.' : 'well-positioned for a measured pricing strategy with stable fundamentals.'}`;
       document.getElementById('aiSummary').textContent = summary;
+
+      updateComparables(market, assetType);
     }
+
+    document.getElementById('market').addEventListener('change', runAnalysis);
+    document.getElementById('assetType').addEventListener('change', runAnalysis);
 
     runAnalysis();
   </script>
